@@ -226,105 +226,131 @@ const nextCtx = nextCanvas.getContext('2d');
 const rivalCtx = rivalCanvas.getContext('2d');
 
 // --- CELL DRAWER (Kawaii style) ---
-function drawCell(ctx, r, c, val, cellSize, offset = { x: 0, y: 0 }, ghost = false) {
+function drawCell(ctx, r, c, val, cellSize, offset = { x: 0, y: 0 }, ghost = false, isActive = false, isHead = false) {
   if (val === 0) return;
   const fruit = FRUITS[val];
   if (!fruit) return;
 
-  const cx = offset.x + c * cellSize + cellSize / 2;
-  const cy = offset.y + r * cellSize + cellSize / 2;
-  const radius = cellSize * 0.44;
+  const pad = 1.5;
+  const size = cellSize - pad * 2;
+  const x = offset.x + c * cellSize + pad;
+  const y = offset.y + r * cellSize + pad;
+  const cx = x + size / 2;
+  const cy = y + size / 2;
+  const radius = size * 0.45;
 
   ctx.save();
   
   if (ghost) {
-    // Ghost piece: translucent, dashed border, simple face outline
+    // Ghost piece: translucent, dashed border, no face
     ctx.strokeStyle = fruit.color;
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 1.5;
     ctx.setLineDash([4, 3]);
     ctx.beginPath();
-    ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+    if (ctx.roundRect) {
+      ctx.roundRect(x, y, size, size, Math.max(3, size * 0.22));
+    } else {
+      ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+    }
     ctx.stroke();
     
-    // Draw cute eyes and blush lightly
-    ctx.fillStyle = fruit.color;
-    ctx.globalAlpha = 0.45;
-    ctx.beginPath();
-    ctx.arc(cx - radius * 0.3, cy - radius * 0.15, radius * 0.08, 0, Math.PI * 2);
-    ctx.arc(cx + radius * 0.3, cy - radius * 0.15, radius * 0.08, 0, Math.PI * 2);
-    ctx.fill();
+    // Draw emoji very faintly in the center
+    ctx.globalAlpha = 0.2;
+    ctx.font = `${size * 0.58}px Arial`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(fruit.emoji, cx, cy);
     ctx.restore();
     return;
   }
 
-  // Draw circular fruit body
-  ctx.shadowColor = 'rgba(0,0,0,0.06)';
-  ctx.shadowBlur = 4;
-  ctx.shadowOffsetY = 2;
+  // Draw rounded square candy body
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.05)';
+  ctx.shadowBlur = 3;
+  ctx.shadowOffsetY = 1.5;
   
   ctx.beginPath();
-  ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+  const cornerRadius = Math.max(4, size * 0.22);
+  if (ctx.roundRect) {
+    ctx.roundRect(x, y, size, size, cornerRadius);
+  } else {
+    ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+  }
   ctx.fillStyle = fruit.color;
   ctx.fill();
 
-  // Draw emoji texture faintly in the center
-  ctx.shadowColor = 'transparent'; // Reset shadow
-  ctx.globalAlpha = 0.2;
-  ctx.font = `${cellSize * 0.58}px Arial`;
+  // White glossy border highlight
+  ctx.shadowColor = 'transparent';
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.35)';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  // Draw emoji texture in the center (vibrant and clear)
+  ctx.globalAlpha = 0.9;
+  ctx.font = `${size * 0.58}px Arial`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillText(fruit.emoji, cx, cy);
   ctx.globalAlpha = 1.0;
 
-  // Draw cute kawaii face
-  ctx.fillStyle = '#4a2511'; // Warm brown color for face details
-  const eyeOffset = radius * 0.32;
-  const eyeSize = Math.max(1.8, radius * 0.08);
+  // Draw face only for head cell of active piece or for garbage rock (val === 8)
+  const shouldDrawFace = (isActive && isHead) || val === 8;
 
-  // Eyes
-  ctx.beginPath();
-  ctx.arc(cx - eyeOffset, cy - eyeOffset * 0.1, eyeSize, 0, Math.PI * 2);
-  ctx.arc(cx + eyeOffset, cy - eyeOffset * 0.1, eyeSize, 0, Math.PI * 2);
-  ctx.fill();
+  if (shouldDrawFace) {
+    ctx.fillStyle = '#4a2511'; // Warm brown color for face details
+    const faceR = size * 0.45;
+    const eyeOffset = faceR * 0.32;
+    const eyeSize = Math.max(1.8, faceR * 0.08);
 
-  // Blushing cheeks
-  ctx.fillStyle = 'rgba(255, 120, 150, 0.45)';
-  ctx.beginPath();
-  ctx.arc(cx - eyeOffset * 1.3, cy + eyeOffset * 0.3, eyeSize * 1.8, 0, Math.PI * 2);
-  ctx.arc(cx + eyeOffset * 1.3, cy + eyeOffset * 0.3, eyeSize * 1.8, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Mouth/Smile
-  ctx.strokeStyle = '#4a2511';
-  ctx.lineWidth = Math.max(1.5, radius * 0.06);
-  ctx.lineCap = 'round';
-  ctx.beginPath();
-  
-  if (val === 8) {
-    // Angry rock has flat or frowning mouth, and angry eyebrows!
-    // Frown mouth
-    ctx.arc(cx, cy + eyeOffset * 0.5, eyeOffset * 0.4, Math.PI, 0);
-    ctx.stroke();
-
-    // Angry eyebrows
-    ctx.strokeStyle = '#4a2511';
-    ctx.lineWidth = radius * 0.08;
+    // Eyes
     ctx.beginPath();
-    ctx.moveTo(cx - eyeOffset * 1.3, cy - eyeOffset * 0.5);
-    ctx.lineTo(cx - eyeOffset * 0.2, cy - eyeOffset * 0.25);
-    ctx.moveTo(cx + eyeOffset * 1.3, cy - eyeOffset * 0.5);
-    ctx.lineTo(cx + eyeOffset * 0.2, cy - eyeOffset * 0.25);
-    ctx.stroke();
-  } else {
-    // Normal happy smile
-    ctx.arc(cx, cy + eyeOffset * 0.1, eyeOffset * 0.55, 0.1, Math.PI - 0.1);
-    ctx.stroke();
+    ctx.arc(cx - eyeOffset, cy - eyeOffset * 0.1, eyeSize, 0, Math.PI * 2);
+    ctx.arc(cx + eyeOffset, cy - eyeOffset * 0.1, eyeSize, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Blushing cheeks
+    ctx.fillStyle = 'rgba(255, 120, 150, 0.45)';
+    ctx.beginPath();
+    ctx.arc(cx - eyeOffset * 1.3, cy + eyeOffset * 0.35, eyeSize * 1.8, 0, Math.PI * 2);
+    ctx.arc(cx + eyeOffset * 1.3, cy + eyeOffset * 0.35, eyeSize * 1.8, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Mouth/Smile
+    ctx.strokeStyle = '#4a2511';
+    ctx.lineWidth = Math.max(1.5, faceR * 0.06);
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    
+    if (val === 8) {
+      // Angry rock has flat or frowning mouth, and angry eyebrows!
+      // Frown mouth
+      ctx.arc(cx, cy + eyeOffset * 0.5, eyeOffset * 0.4, Math.PI, 0);
+      ctx.stroke();
+
+      // Angry eyebrows
+      ctx.strokeStyle = '#4a2511';
+      ctx.lineWidth = faceR * 0.08;
+      ctx.beginPath();
+      ctx.moveTo(cx - eyeOffset * 1.3, cy - eyeOffset * 0.5);
+      ctx.lineTo(cx - eyeOffset * 0.2, cy - eyeOffset * 0.25);
+      ctx.moveTo(cx + eyeOffset * 1.3, cy - eyeOffset * 0.5);
+      ctx.lineTo(cx + eyeOffset * 0.2, cy - eyeOffset * 0.25);
+      ctx.stroke();
+    } else {
+      // Normal happy smile
+      ctx.arc(cx, cy + eyeOffset * 0.1, eyeOffset * 0.55, 0.1, Math.PI - 0.1);
+      ctx.stroke();
+    }
   }
 
-  // Specular Highlight (bubble effect)
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+  // Specular Highlight (glossy bubble glare on top-left)
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
   ctx.beginPath();
-  ctx.arc(cx - radius * 0.35, cy - radius * 0.35, radius * 0.12, 0, Math.PI * 2);
+  if (ctx.ellipse) {
+    ctx.ellipse(cx - size * 0.22, cy - size * 0.22, size * 0.12, size * 0.06, -Math.PI / 4, 0, Math.PI * 2);
+  } else {
+    ctx.arc(cx - size * 0.2, cy - size * 0.2, size * 0.08, 0, Math.PI * 2);
+  }
   ctx.fill();
 
   ctx.restore();
@@ -635,10 +661,13 @@ function drawGame() {
     }
 
     // 2. Draw actual piece
+    let headFound = false;
     for (let r = 0; r < currentPiece.matrix.length; r++) {
       for (let c = 0; c < currentPiece.matrix[r].length; c++) {
         if (currentPiece.matrix[r][c] !== 0) {
-          drawCell(ctx, currentPiece.r + r, currentPiece.c + c, currentPiece.id, cellSize);
+          const isHead = !headFound;
+          headFound = true;
+          drawCell(ctx, currentPiece.r + r, currentPiece.c + c, currentPiece.id, cellSize, { x: 0, y: 0 }, false, true, isHead);
         }
       }
     }
@@ -656,10 +685,13 @@ function drawNextPreview() {
   const offsetX = (nextCanvas.width - size * cellS) / 2;
   const offsetY = (nextCanvas.height - size * cellS) / 2;
   
+  let headFound = false;
   for (let r = 0; r < size; r++) {
     for (let c = 0; c < size; c++) {
       if (matrix[r][c] !== 0) {
-        drawCell(nextCtx, r, c, nextPieceId, cellS, { x: offsetX, y: offsetY });
+        const isHead = !headFound;
+        headFound = true;
+        drawCell(nextCtx, r, c, nextPieceId, cellS, { x: offsetX, y: offsetY }, false, true, isHead);
       }
     }
   }
@@ -675,10 +707,13 @@ function drawHoldPreview() {
   const offsetX = (holdCanvas.width - size * cellS) / 2;
   const offsetY = (holdCanvas.height - size * cellS) / 2;
   
+  let headFound = false;
   for (let r = 0; r < size; r++) {
     for (let c = 0; c < size; c++) {
       if (matrix[r][c] !== 0) {
-        drawCell(holdCtx, r, c, heldPieceId, cellS, { x: offsetX, y: offsetY });
+        const isHead = !headFound;
+        headFound = true;
+        drawCell(holdCtx, r, c, heldPieceId, cellS, { x: offsetX, y: offsetY }, false, true, isHead);
       }
     }
   }

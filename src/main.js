@@ -231,32 +231,26 @@ function drawCell(ctx, r, c, val, cellSize, offset = { x: 0, y: 0 }, ghost = fal
   const fruit = FRUITS[val];
   if (!fruit) return;
 
-  const pad = 0; // Sin espacio para que las celdas se unan en una sola figura sólida
-  const size = cellSize;
   const x = offset.x + c * cellSize;
   const y = offset.y + r * cellSize;
-  const cx = x + size / 2;
-  const cy = y + size / 2;
-  const radius = size * 0.5;
+  const cx = x + cellSize / 2;
+  const cy = y + cellSize / 2;
+  const radius = cellSize * 0.52; // Un poco más grandes para que se toquen y formen figuras de burbujas unificadas
 
   ctx.save();
   
   if (ghost) {
-    // Ghost piece: translucent, dashed border, no face
+    // Ghost piece: translucent, dashed circular border, no face
     ctx.strokeStyle = fruit.color;
     ctx.lineWidth = 1;
     ctx.setLineDash([3, 3]);
     ctx.beginPath();
-    if (ctx.roundRect) {
-      ctx.roundRect(x + 1, y + 1, size - 2, size - 2, 4);
-    } else {
-      ctx.arc(cx, cy, radius - 1, 0, Math.PI * 2);
-    }
+    ctx.arc(cx, cy, (cellSize * 0.5) - 1, 0, Math.PI * 2);
     ctx.stroke();
     
     // Draw emoji very faintly in the center
     ctx.globalAlpha = 0.25;
-    ctx.font = `${size * 0.6}px Arial`;
+    ctx.font = `${cellSize * 0.6}px Arial`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(fruit.emoji, cx, cy);
@@ -264,20 +258,15 @@ function drawCell(ctx, r, c, val, cellSize, offset = { x: 0, y: 0 }, ghost = fal
     return;
   }
 
-  // Draw square candy body (slightly rounded corners so they merge nicely)
+  // Draw circular fruit body
   ctx.beginPath();
-  const cornerRadius = 4; // Redondeado sutil para unificar la figura
-  if (ctx.roundRect) {
-    ctx.roundRect(x, y, size, size, cornerRadius);
-  } else {
-    ctx.rect(x, y, size, size);
-  }
+  ctx.arc(cx, cy, radius, 0, Math.PI * 2);
   ctx.fillStyle = fruit.color;
   ctx.fill();
 
   // Draw emoji texture in the center (vibrant and clear)
   ctx.globalAlpha = 0.95;
-  ctx.font = `${size * 0.62}px Arial`;
+  ctx.font = `${cellSize * 0.64}px Arial`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillText(fruit.emoji, cx, cy);
@@ -288,7 +277,7 @@ function drawCell(ctx, r, c, val, cellSize, offset = { x: 0, y: 0 }, ghost = fal
 
   if (shouldDrawFace) {
     ctx.fillStyle = '#4a2511'; // Warm brown color for face details
-    const faceR = size * 0.5;
+    const faceR = radius;
     const eyeOffset = faceR * 0.32;
     const eyeSize = Math.max(1.8, faceR * 0.08);
 
@@ -333,10 +322,10 @@ function drawCell(ctx, r, c, val, cellSize, offset = { x: 0, y: 0 }, ghost = fal
     }
   }
 
-  // Specular Highlight (very subtle bubble glare on top-left to avoid clutter)
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
+  // Specular Highlight (glossy bubble glare on top-left)
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
   ctx.beginPath();
-  ctx.arc(cx - size * 0.22, cy - size * 0.22, size * 0.06, 0, Math.PI * 2);
+  ctx.arc(cx - radius * 0.38, cy - radius * 0.38, radius * 0.12, 0, Math.PI * 2);
   ctx.fill();
 
   ctx.restore();

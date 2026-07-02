@@ -36,7 +36,7 @@ body {
   position: relative;
   width: 100vw;
   height: 100dvh;
-  max-width: 480px;
+  max-width: 500px;
   background: rgba(255, 255, 255, 0.45);
   box-shadow: 0 15px 35px rgba(255, 96, 173, 0.1);
   border-left: 2px solid rgba(255, 255, 255, 0.6);
@@ -44,7 +44,7 @@ body {
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
-  padding: 10px 15px;
+  padding: 8px 12px;
   z-index: 1;
 }
 
@@ -109,14 +109,15 @@ body {
   min-height: 0; /* allows proper shrinking on small displays */
 }
 
-/* Side Panels */
+/* Side Panels & Overlays */
 .side-panel {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  width: 75px;
+  width: 80px;
   justify-content: flex-start;
   align-items: center;
+  box-sizing: border-box;
 }
 
 .panel-box {
@@ -159,8 +160,8 @@ body {
 }
 
 .rival-preview-box {
-  width: 60px;
-  height: 120px;
+  width: 66px;
+  height: 132px;
   background: rgba(255, 255, 255, 0.5);
   border-radius: 10px;
   border: 1px solid var(--border-color);
@@ -171,6 +172,58 @@ body {
 }
 
 .rival-preview-box canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Floating Overlays (Solo mode) */
+.floating-preview {
+  position: absolute;
+  z-index: 5;
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(6px);
+  border: 2.5px solid var(--border-color);
+  border-radius: 22px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 5px 12px rgba(255, 96, 173, 0.2);
+  box-sizing: border-box;
+}
+
+.hold-pos {
+  top: 10px;
+  left: 10px;
+}
+
+.next-pos {
+  top: 10px;
+  right: 10px;
+}
+
+.preview-title {
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.8px;
+  margin-bottom: 3px;
+  text-align: center;
+  color: var(--text-color);
+}
+
+.preview-box-circular {
+  width: 46px;
+  height: 46px;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.preview-box-circular canvas {
   width: 100%;
   height: 100%;
   display: block;

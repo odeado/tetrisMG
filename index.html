@@ -32,35 +32,45 @@
       <!-- MAIN PLAYING AREA -->
       <div id="play-area" class="hidden">
         
-        <!-- LEFT PANEL (HOLD) -->
-        <div class="side-panel left-panel">
-          <div class="panel-box">
-            <div class="panel-label">HOLD</div>
-            <div id="hold-preview" class="preview-box">
-              <canvas id="hold-canvas" width="64" height="64"></canvas>
+        <!-- MAIN CANVAS WITH FLOATING OVERLAYS -->
+        <div class="canvas-wrapper">
+          <!-- Hold floating overlay (Solo mode) -->
+          <div id="hold-overlay" class="floating-preview hold-pos">
+            <div class="preview-title">HOLD</div>
+            <div class="preview-box-circular">
+              <canvas id="hold-canvas" width="52" height="52"></canvas>
             </div>
           </div>
-        </div>
+          
+          <!-- Next floating overlay (Solo mode) -->
+          <div id="next-overlay" class="floating-preview next-pos">
+            <div class="preview-title">NEXT</div>
+            <div class="preview-box-circular">
+              <canvas id="next-canvas" width="52" height="52"></canvas>
+            </div>
+          </div>
 
-        <!-- MAIN CANVAS -->
-        <div class="canvas-wrapper">
           <canvas id="game-canvas"></canvas>
         </div>
 
-        <!-- RIGHT PANEL (NEXT & RIVAL) -->
-        <div class="side-panel right-panel">
+        <!-- VERSUS MODE PANEL (Only visible on VS, 2-column layout) -->
+        <div id="vs-panel" class="side-panel hidden">
           <div class="panel-box">
-            <div class="panel-label">NEXT</div>
-            <div id="next-preview" class="preview-box">
-              <canvas id="next-canvas" width="64" height="64"></canvas>
+            <div class="panel-label">HOLD</div>
+            <div class="preview-box">
+              <canvas id="vs-hold-canvas" width="52" height="52"></canvas>
             </div>
           </div>
-
-          <!-- Rival mini board (Only visible in multiplayer) -->
-          <div id="rival-board-box" class="panel-box hidden">
+          <div class="panel-box">
+            <div class="panel-label">NEXT</div>
+            <div class="preview-box">
+              <canvas id="vs-next-canvas" width="52" height="52"></canvas>
+            </div>
+          </div>
+          <div id="rival-board-box" class="panel-box">
             <div class="panel-label" style="color: var(--accent-pink);">RIVAL</div>
             <div class="rival-preview-box">
-              <canvas id="rival-canvas" width="80" height="160"></canvas>
+              <canvas id="rival-canvas" width="70" height="140"></canvas>
             </div>
           </div>
         </div>

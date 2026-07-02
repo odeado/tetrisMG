@@ -210,8 +210,8 @@ const opponentScoreEl = document.getElementById('opponent-score');
 const opponentScoreContainer = document.getElementById('opponent-score-container');
 
 const gameCanvas = document.getElementById('game-canvas');
-const holdCanvas = document.getElementById('hold-canvas');
-const nextCanvas = document.getElementById('next-canvas');
+let holdCanvas = null;
+let nextCanvas = null;
 const rivalCanvas = document.getElementById('rival-canvas');
 const rivalBoardBox = document.getElementById('rival-board-box');
 
@@ -221,8 +221,8 @@ const leaderboardList = document.getElementById('leaderboard-list');
 
 // Canvas Contexts
 const ctx = gameCanvas.getContext('2d');
-const holdCtx = holdCanvas.getContext('2d');
-const nextCtx = nextCanvas.getContext('2d');
+let holdCtx = null;
+let nextCtx = null;
 const rivalCtx = rivalCanvas.getContext('2d');
 
 // --- CELL DRAWER (Kawaii style) ---
@@ -1027,6 +1027,26 @@ function startGame() {
   if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
     mobileControls.classList.remove('hidden');
   }
+
+  // Set up canvas references and display overlays / panels based on mode
+  if (isMultiplayer) {
+    document.getElementById('vs-panel').classList.remove('hidden');
+    document.getElementById('hold-overlay').classList.add('hidden');
+    document.getElementById('next-overlay').classList.add('hidden');
+    
+    holdCanvas = document.getElementById('vs-hold-canvas');
+    nextCanvas = document.getElementById('vs-next-canvas');
+  } else {
+    document.getElementById('vs-panel').classList.add('hidden');
+    document.getElementById('hold-overlay').classList.remove('hidden');
+    document.getElementById('next-overlay').classList.remove('hidden');
+    
+    holdCanvas = document.getElementById('hold-canvas');
+    nextCanvas = document.getElementById('next-canvas');
+  }
+  
+  holdCtx = holdCanvas.getContext('2d');
+  nextCtx = nextCanvas.getContext('2d');
 
   resizeCanvas();
   window.addEventListener('resize', resizeCanvas);
